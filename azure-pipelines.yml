@@ -2,14 +2,26 @@ trigger:
 - main
 
 pool:
-  name: 'Default'
+  name: 'Default' # Runs on your Mac
 
 steps:
+# Step 1: This command actually creates the .war file from your Java code
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'package'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+    mavenVersionOption: 'Default'
+
+# Step 2: Now we copy that newly created file to the staging area
 - task: CopyFiles@2
   inputs:
-    contents: '**/*.war'
+    contents: '**/target/*.war'
     targetFolder: '$(Build.ArtifactStagingDirectory)'
 
+# Step 3: Publish it so the Release Pipeline can see it
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
